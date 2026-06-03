@@ -13,7 +13,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -133,7 +132,7 @@ public class ContactService {
                             .label(e.getLabel() != null
                                     ? e.getLabel() : "personal")
                             .build())
-                    .collect(Collectors.toList());
+                    .toList();
             emailRepository.saveAll(emails);
         }
 
@@ -145,7 +144,7 @@ public class ContactService {
                             .label(p.getLabel() != null
                                     ? p.getLabel() : "mobile")
                             .build())
-                    .collect(Collectors.toList());
+                    .toList();
             phoneRepository.saveAll(phones);
         }
     }
@@ -159,7 +158,7 @@ public class ContactService {
                                   e.getId(),
                                   e.getEmailAddress(),
                                   e.getLabel()))
-                          .collect(Collectors.toList())
+                          .toList()
                         : Collections.emptyList();
 
         List<ContactResponse.PhoneEntry> phones =
@@ -169,7 +168,7 @@ public class ContactService {
                                   p.getId(),
                                   p.getPhoneNumber(),
                                   p.getLabel()))
-                          .collect(Collectors.toList())
+                          .toList()
                         : Collections.emptyList();
 
         return new ContactResponse(
