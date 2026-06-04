@@ -88,12 +88,28 @@ public class ContactService {
         // delete old emails and phones then save new ones
         emailRepository.deleteByContactId(contactId);
         phoneRepository.deleteByContactId(contactId);
-        saveEmailsAndPhones(contact, request);
+
+        // flush so deleted records are gone before saving new ones
+        emailRepository.flush();
+        phoneRepository.flush();
+
+        // clear stale collections from the in-memory entity
+        contact.getEmails().clear();
+        contact.getPhones().clear();
 
         contactRepository.save(contact);
+
+        // save the new emails and phones
+        saveEmailsAndPhones(contact, request);
+
+        // reload fresh from DB so toResponse reflects actual saved data
+        Contact updated = contactRepository.findById(contactId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Contact not found"));
+
         log.info("Contact {} updated by user {}", contactId, userId);
 
-        return toResponse(contact);
+        return toResponse(updated);
     }
 
     // ── DELETE ──────────────────────────────────────────────
@@ -183,3 +199,4 @@ public class ContactService {
         );
     }
 }
+
