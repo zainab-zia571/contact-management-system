@@ -153,6 +153,7 @@ import com.contactmanager.backend.exception.BadRequestException;
 import com.contactmanager.backend.exception.ResourceNotFoundException;
 import com.contactmanager.backend.repository.UserRepository;
 import com.contactmanager.backend.security.JwtTokenProvider;
+import com.contactmanager.backend.util.ValidationUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -169,49 +170,83 @@ public class AuthService {
 
     public AuthResponse register(RegisterRequest request) {
 
-        String username = request.getUsername() != null ? request.getUsername().trim() : null;
-        String email = (request.getEmail() != null && !request.getEmail().isBlank())
+        String username = (request.getUsername() != null)
+                ? request.getUsername().trim() : null;
+
+        String email = (request.getEmail() != null
+                && !request.getEmail().isBlank())
                 ? request.getEmail().trim().toLowerCase() : null;
-        String phoneNumber = (request.getPhoneNumber() != null && !request.getPhoneNumber().isBlank())
+
+        String phoneNumber = (request.getPhoneNumber() != null
+                && !request.getPhoneNumber().isBlank())
                 ? request.getPhoneNumber().trim() : null;
 
-        log.info("Register — username='{}' email='{}' phone='{}'", username, email, phoneNumber);
+        String password = request.getPassword();
 
+        log.info("Register attempt — username='{}' email='{}' phone='{}'",
+                username, email, phoneNumber);
+
+        // ── username ─────────────────────────────────────────────
         if (username == null || username.isBlank()) {
             throw new BadRequestException("Username is required");
         }
+        if (!ValidationUtils.isValidUsername(username)) {
+            throw new BadRequestException(
+                    "Username can only contain letters, numbers and " +
+                            "underscores, must include at least one letter, " +
+                            "and be 3-30 characters");
+        }
 
+        // ── email or phone required ──────────────────────────────
         if (email == null && phoneNumber == null) {
-            throw new BadRequestException("Please provide at least one of email or phone number");
+            throw new BadRequestException(
+                    "Please provide at least one of email or phone number");
         }
 
-        if (email != null && !email.matches("^[a-zA-Z0-9._%+\\-]+@[a-zA-Z0-9.\\-]+\\.[a-zA-Z]{2,}$")) {
-            throw new BadRequestException("Please enter a valid email address");
+        // ── email format ─────────────────────────────────────────
+        if (email != null && !ValidationUtils.isValidEmail(email)) {
+            throw new BadRequestException(
+                    "Please enter a valid email address (e.g. john@gmail.com)");
         }
 
+        // ── phone format ─────────────────────────────────────────
+        if (phoneNumber != null
+                && !ValidationUtils.isValidPhone(phoneNumber)) {
+            throw new BadRequestException(
+                    "Phone number can only contain digits and an " +
+                            "optional + at the start. Must be 7-15 digits");
+        }
+
+        // ── password ─────────────────────────────────────────────
+        if (!ValidationUtils.isValidPassword(password)) {
+            throw new BadRequestException(
+                    "Password must be at least 6 characters and " +
+                            "contain at least one letter and one number");
+        }
+
+        // ── uniqueness checks ────────────────────────────────────
         if (userRepository.existsByUsername(username)) {
             throw new BadRequestException("Username already taken");
         }
-
-        // 🔥 KEY FIX: Use the safe methods only when value is not null
-        if (email != null && userRepository.existsByEmailIgnoreNull(email)) {
+        if (email != null && userRepository.existsByEmail(email)) {
             throw new BadRequestException("Email already registered");
         }
-
-        if (phoneNumber != null && userRepository.existsByPhoneNumberIgnoreNull(phoneNumber)) {
-            throw new BadRequestException("Phone number already registered");
+        if (phoneNumber != null
+                && userRepository.existsByPhoneNumber(phoneNumber)) {
+            throw new BadRequestException(
+                    "Phone number already registered");
         }
 
+        // ── save ─────────────────────────────────────────────────
         User user = User.builder()
                 .username(username)
                 .email(email)
                 .phoneNumber(phoneNumber)
-                .passwordHash(passwordEncoder.encode(request.getPassword()))
+                .passwordHash(passwordEncoder.encode(password))
                 .build();
 
         userRepository.save(user);
-        log.info("User registered: username='{}' email='{}' phone='{}'",
-                user.getUsername(), user.getEmail(), user.getPhoneNumber());
+        log.info("User registered successfully: '{}'", user.getUsername());
 
         String token = jwtTokenProvider.generateToken(user.getUsername());
         return new AuthResponse(token, user.getUsername(), user.getEmail());
