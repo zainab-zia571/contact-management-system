@@ -14,12 +14,15 @@ export default function LoginPage() {
   const navigate = useNavigate()
 
   const validate = () => {
-    const e = {}
-    if (!identifier.trim()) e.identifier = 'Email, username or phone is required'
-    if (!password.trim()) e.password = 'Password is required'
-    else if (password.length < 6) e.password = 'Password must be at least 6 characters'
-    return e
-  }
+  const e = {}
+  if (!identifier.trim())
+    e.identifier = 'Email, username or phone is required'
+  if (!password.trim())
+    e.password = 'Password is required'
+  else if (password.length < 6)
+    e.password = 'Password must be at least 6 characters'
+  return e
+}
 
   const handleSubmit = async (e) => {
     e.preventDefault()

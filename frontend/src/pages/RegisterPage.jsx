@@ -3,6 +3,12 @@ import { useNavigate, Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { useAuth } from '../context/AuthContext'
 import api from '../api/axios'
+import {
+  validateUsername,
+  validateEmail,
+  validatePhone,
+  validatePassword,
+} from '../utils/validators'
 
 export default function RegisterPage() {
   const [form, setForm] = useState({
@@ -22,29 +28,28 @@ export default function RegisterPage() {
     setApiError('')
   }
 
-  const validate = () => {
+const validate = () => {
   const e = {}
 
-  if (!form.username.trim())
-    e.username = 'Username is required'
-  else if (form.username.trim().length < 3)
-    e.username = 'Username must be at least 3 characters'
+  const usernameErr = validateUsername(form.username)
+  if (usernameErr) e.username = usernameErr
 
-  // neither email nor phone provided
-  if (!form.email.trim() && !form.phoneNumber.trim())
+  if (!form.email.trim() && !form.phoneNumber.trim()) {
     e.contact = 'Please provide an email or phone number'
-
-  // email provided but invalid format
-  if (form.email.trim()) {
-    const emailRegex = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/
-    if (!emailRegex.test(form.email.trim()))
-      e.email = 'Please enter a valid email address (e.g. john@gmail.com)'
   }
 
-  if (!form.password.trim())
-    e.password = 'Password is required'
-  else if (form.password.length < 6)
-    e.password = 'Password must be at least 6 characters'
+  if (form.email.trim()) {
+    const emailErr = validateEmail(form.email)
+    if (emailErr) e.email = emailErr
+  }
+
+  if (form.phoneNumber.trim()) {
+    const phoneErr = validatePhone(form.phoneNumber)
+    if (phoneErr) e.phoneNumber = phoneErr
+  }
+
+  const passErr = validatePassword(form.password)
+  if (passErr) e.password = passErr
 
   return e
 }

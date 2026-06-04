@@ -1,6 +1,11 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import api from '../../api/axios'
+import {
+  validateName,
+  validateContactEmail,
+  validateContactPhone,
+} from '../../utils/validators'
 
 export default function EditContactModal({ open, onClose, contact, onUpdated }) {
   const [form, setForm] = useState({
@@ -55,22 +60,44 @@ export default function EditContactModal({ open, onClose, contact, onUpdated }) 
     setForm({ ...form, phones: form.phones.filter((_, idx) => idx !== i) })
 
   const handleSubmit = async () => {
-    if (!form.firstName || !form.lastName) {
-      return setError('First and last name are required')
-    }
-    setLoading(true)
-    setError('')
-    try {
-      const res = await api.put(`/contacts/${contact.id}`, form)
-      const updated = res.data?.data || res.data
-      onUpdated && onUpdated(updated)
-      onClose()
-    } catch (err) {
-      setError(err.response?.data?.message || 'Update failed')
-    } finally {
-      setLoading(false)
-    }
+  const e = {}
+
+  const firstErr = validateName(form.firstName, 'First name')
+  if (firstErr) e.firstName = firstErr
+
+  const lastErr = validateName(form.lastName, 'Last name')
+  if (lastErr) e.lastName = lastErr
+
+  if (form.title && form.title.trim() && /[0-9]/.test(form.title))
+    e.title = 'Title cannot contain numbers'
+
+  form.emails.forEach((em, i) => {
+    const err = validateContactEmail(em.emailAddress)
+    if (err) e[`email_${i}`] = err
+  })
+
+  form.phones.forEach((ph, i) => {
+    const err = validateContactPhone(ph.phoneNumber)
+    if (err) e[`phone_${i}`] = err
+  })
+
+  if (Object.keys(e).length > 0) {
+    setError(Object.values(e)[0])
+    return
   }
+
+  setLoading(true)
+  setError('')
+  try {
+    await api.put(`/contacts/${contact.id}`, form)
+    onUpdated()
+    onClose()
+  } catch (err) {
+    setError(err.response?.data?.message || 'Update failed')
+  } finally {
+    setLoading(false)
+  }
+}
 
   const inputStyle = { marginBottom: 12 }
   const labelColors = {

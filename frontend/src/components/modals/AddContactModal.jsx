@@ -1,6 +1,11 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import api from '../../api/axios'
+import {
+  validateName,
+  validateContactEmail,
+  validateContactPhone,
+} from '../../utils/validators'
 
 const emptyEmail = () => ({ emailAddress: '', label: 'work' })
 const emptyPhone = () => ({ phoneNumber: '', label: 'work' })
@@ -13,22 +18,30 @@ export default function AddContactModal({ open, onClose, onAdded }) {
   })
   const [errors, setErrors] = useState({})
   const [loading, setLoading] = useState(false)
+const validate = () => {
+  const e = {}
 
-  const validate = () => {
-    const e = {}
-    if (!form.firstName.trim()) e.firstName = 'First name is required'
-    if (!form.lastName.trim()) e.lastName = 'Last name is required'
-    form.emails.forEach((em, i) => {
-      if (!em.emailAddress.trim()) e[`email_${i}`] = 'Email is required'
-      else if (!/\S+@\S+\.\S+/.test(em.emailAddress))
-        e[`email_${i}`] = 'Enter a valid email'
-    })
-    form.phones.forEach((ph, i) => {
-      if (!ph.phoneNumber.trim()) e[`phone_${i}`] = 'Phone number is required'
-    })
-    return e
-  }
+  const firstErr = validateName(form.firstName, 'First name')
+  if (firstErr) e.firstName = firstErr
 
+  const lastErr = validateName(form.lastName, 'Last name')
+  if (lastErr) e.lastName = lastErr
+
+  if (form.title && form.title.trim() && /[0-9]/.test(form.title))
+    e.title = 'Title cannot contain numbers'
+
+  form.emails.forEach((em, i) => {
+    const err = validateContactEmail(em.emailAddress)
+    if (err) e[`email_${i}`] = err
+  })
+
+  form.phones.forEach((ph, i) => {
+    const err = validateContactPhone(ph.phoneNumber)
+    if (err) e[`phone_${i}`] = err
+  })
+
+  return e
+}
   const handleChange = e =>
     setForm({ ...form, [e.target.name]: e.target.value })
 
