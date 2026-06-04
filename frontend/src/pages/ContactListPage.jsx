@@ -110,7 +110,10 @@ export default function ContactListPage() {
       <EditContactModal
         open={!!editContact} contact={editContact}
         onClose={() => setEditContact(null)}
-        onUpdated={() => { fetchContacts(); toast.success('Contact updated ✓') }}
+        onUpdated={(updated) => {
+          fetchContacts()
+          toast.success('Contact updated ✓')
+        }}
       />
       <DeleteContactModal
         open={!!deleteContact} contact={deleteContact}
@@ -333,3 +336,4 @@ export default function ContactListPage() {
     </div>
   )
 }
+

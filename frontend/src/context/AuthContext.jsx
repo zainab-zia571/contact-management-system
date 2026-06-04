@@ -4,25 +4,32 @@ const AuthContext = createContext(null)
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null)
-  const [token, setToken] = useState(localStorage.getItem('token'))
+  const [token, setToken] = useState(null)
 
+  // on app load — restore from sessionStorage (not localStorage)
+  // sessionStorage is cleared automatically when the browser/tab closes
   useEffect(() => {
-    const stored = localStorage.getItem('user')
-    if (stored) setUser(JSON.parse(stored))
+    const storedToken = sessionStorage.getItem('token')
+    const storedUser  = sessionStorage.getItem('user')
+    if (storedToken && storedUser) {
+      setToken(storedToken)
+      setUser(JSON.parse(storedUser))
+    }
   }, [])
 
   const login = (userData, authToken) => {
     setUser(userData)
     setToken(authToken)
-    localStorage.setItem('token', authToken)
-    localStorage.setItem('user', JSON.stringify(userData))
+    // use sessionStorage so data is wiped when tab/browser closes
+    sessionStorage.setItem('token', authToken)
+    sessionStorage.setItem('user', JSON.stringify(userData))
   }
 
   const logout = () => {
     setUser(null)
     setToken(null)
-    localStorage.removeItem('token')
-    localStorage.removeItem('user')
+    sessionStorage.removeItem('token')
+    sessionStorage.removeItem('user')
   }
 
   return (

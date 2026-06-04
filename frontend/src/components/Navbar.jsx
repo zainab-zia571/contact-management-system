@@ -32,7 +32,8 @@ export default function Navbar() {
         background: 'linear-gradient(135deg,var(--cyan),var(--pink))',
         WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
       }}>
-        ⬡ NEXUS
+        ◎ TouchBase
+
       </Link>
 
       <div style={{ display: 'flex', gap: 36, alignItems: 'center' }}>

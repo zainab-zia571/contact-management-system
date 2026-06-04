@@ -5,21 +5,22 @@ const api = axios.create({
   headers: { 'Content-Type': 'application/json' },
 })
 
-// attach JWT token to every request automatically
+// attach JWT token from sessionStorage
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token')
+  const token = sessionStorage.getItem('token')
   if (token) {
     config.headers.Authorization = `Bearer ${token}`
   }
   return config
 })
 
-// handle 401 globally — redirect to login
+// handle 401 — clear session and redirect to login
 api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      localStorage.removeItem('token')
+      sessionStorage.removeItem('token')
+      sessionStorage.removeItem('user')
       window.location.href = '/login'
     }
     return Promise.reject(error)

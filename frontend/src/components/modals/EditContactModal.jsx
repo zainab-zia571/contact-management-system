@@ -61,8 +61,9 @@ export default function EditContactModal({ open, onClose, contact, onUpdated }) 
     setLoading(true)
     setError('')
     try {
-      await api.put(`/contacts/${contact.id}`, form)
-      onUpdated()
+      const res = await api.put(`/contacts/${contact.id}`, form)
+      const updated = res.data?.data || res.data
+      onUpdated && onUpdated(updated)
       onClose()
     } catch (err) {
       setError(err.response?.data?.message || 'Update failed')
@@ -250,3 +251,5 @@ export default function EditContactModal({ open, onClose, contact, onUpdated }) 
     </AnimatePresence>
   )
 }
+
+
