@@ -1,0 +1,6 @@
+projectKey=touchbase-frontend
+serverUrl=http://localhost:9000
+serverVersion=26.4.0.121862
+dashboardUrl=http://localhost:9000/dashboard?id=touchbase-frontend
+ceTaskId=9dca3936-9a33-4423-8ffb-f8ec8d2956d6
+ceTaskUrl=http://localhost:9000/api/ce/task?id=9dca3936-9a33-4423-8ffb-f8ec8d2956d6

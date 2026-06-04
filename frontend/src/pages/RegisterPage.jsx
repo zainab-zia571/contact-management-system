@@ -40,6 +40,7 @@ const validate = () => {
 
   if (form.email.trim()) {
     const emailErr = validateEmail(form.email)
+      console.log('Email error:', emailErr)  // <-- add this
     if (emailErr) e.email = emailErr
   }
 
@@ -47,6 +48,8 @@ const validate = () => {
     const phoneErr = validatePhone(form.phoneNumber)
     if (phoneErr) e.phoneNumber = phoneErr
   }
+
+  
 
   const passErr = validatePassword(form.password)
   if (passErr) e.password = passErr
@@ -193,9 +196,9 @@ const validate = () => {
                 (required if no phone)
               </span>
             </label>
-            <input className="form-input" name="email" type="email"
-              placeholder="john@example.com" value={form.email}
-              onChange={handleChange} style={inputErr('email')} />
+           <input className="form-input" name="email"
+  placeholder="john@example.com" value={form.email}
+  onChange={handleChange} style={inputErr('email')} />
             <ErrMsg field="email" />
           </div>
 
