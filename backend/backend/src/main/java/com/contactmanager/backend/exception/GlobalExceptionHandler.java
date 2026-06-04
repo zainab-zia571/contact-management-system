@@ -2,6 +2,7 @@ package com.contactmanager.backend.exception;
 
 import com.contactmanager.backend.dto.response.ApiResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -43,11 +44,45 @@ public class GlobalExceptionHandler {
                 .body(ApiResponse.error(errors));
     }
 
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<ApiResponse<Void>> handleGeneral(Exception ex) {
-        log.error("Unexpected error: {}", ex.getMessage(), ex);
-        return ResponseEntity
-                .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ApiResponse.error("An unexpected error occurred"));
+    // ── catches DB constraint violations ────────────────────
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ApiResponse<Void>> handleDataIntegrity(
+            DataIntegrityViolationException ex) {
+
+        // log the full message so you can see exactly what fired
+        String rootMsg = ex.getRootCause() != null
+                ? ex.getRootCause().getMessage() : "";
+        String msg = ex.getMessage() != null
+                ? ex.getMessage() : "";
+
+        String combined = (msg + " " + rootMsg).toLowerCase();
+
+        log.error("Data integrity violation — message: {} | root: {}",
+                msg, rootMsg);
+
+        if (combined.contains("chk_email_or_phone")
+                || combined.contains("check constraint")) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(ApiResponse.error(
+                            "Please provide at least one of email or phone number"));
+        }
+        if (combined.contains("ix_") && combined.contains("email")
+                || combined.contains("unique") && combined.contains("email")) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(ApiResponse.error("This email is already registered"));
+        }
+        if (combined.contains("phone")) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(ApiResponse.error(
+                            "This phone number is already registered"));
+        }
+        if (combined.contains("username")) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(ApiResponse.error("This username is already taken"));
+        }
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ApiResponse.error(
+                        "A registration error occurred. Please check your details."));
     }
 }

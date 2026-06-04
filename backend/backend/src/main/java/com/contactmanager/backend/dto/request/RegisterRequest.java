@@ -1,5 +1,30 @@
-package com.contactmanager.backend.dto.request;
+//package com.contactmanager.backend.dto.request;
+//
+//import jakarta.validation.constraints.NotBlank;
+//import jakarta.validation.constraints.Size;
+//import lombok.Data;
+//
+//@Data
+//public class RegisterRequest {
+//
+//    @NotBlank(message = "Username is required")
+//    @Size(min = 3, max = 100,
+//            message = "Username must be between 3 and 100 characters")
+//    private String username;
+//
+//    // NO @Email annotation here — we validate manually in the service
+//    // @Email causes issues when field is null/empty (optional field)
+//    private String email;
+//
+//    private String phoneNumber;
+//
+//    @NotBlank(message = "Password is required")
+//    @Size(min = 6, max = 100,
+//            message = "Password must be at least 6 characters")
+//    private String password;
+//}
 
+package com.contactmanager.backend.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -8,14 +33,16 @@ import lombok.Data;
 @Data
 public class RegisterRequest {
 
-    @NotBlank
-    @Size(min = 3, max = 100)
+    @NotBlank(message = "Username is required")
+    @Size(min = 3, max = 100, message = "Username must be between 3 and 100 characters")
     private String username;
 
+    // No @Email – we validate in service
     private String email;
+
     private String phoneNumber;
 
-    @NotBlank
-    @Size(min = 6, max = 100)
+    @NotBlank(message = "Password is required")
+    @Size(min = 6, max = 100, message = "Password must be at least 6 characters")
     private String password;
 }
