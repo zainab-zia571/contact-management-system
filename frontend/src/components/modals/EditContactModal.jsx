@@ -7,6 +7,8 @@ import {
   validateContactPhone,
 } from '../../utils/validators'
 
+import PropTypes from 'prop-types'
+
 export default function EditContactModal({ open, onClose, contact, onUpdated }) {
   const [form, setForm] = useState({
     firstName: '', lastName: '', title: '',
@@ -60,44 +62,44 @@ export default function EditContactModal({ open, onClose, contact, onUpdated }) 
     setForm({ ...form, phones: form.phones.filter((_, idx) => idx !== i) })
 
   const handleSubmit = async () => {
-  const e = {}
+    const e = {}
 
-  const firstErr = validateName(form.firstName, 'First name')
-  if (firstErr) e.firstName = firstErr
+    const firstErr = validateName(form.firstName, 'First name')
+    if (firstErr) e.firstName = firstErr
 
-  const lastErr = validateName(form.lastName, 'Last name')
-  if (lastErr) e.lastName = lastErr
+    const lastErr = validateName(form.lastName, 'Last name')
+    if (lastErr) e.lastName = lastErr
 
-  if (form.title && form.title.trim() && /[0-9]/.test(form.title))
-    e.title = 'Title cannot contain numbers'
+    if (form.title && form.title.trim() && /[0-9]/.test(form.title))
+      e.title = 'Title cannot contain numbers'
 
-  form.emails.forEach((em, i) => {
-    const err = validateContactEmail(em.emailAddress)
-    if (err) e[`email_${i}`] = err
-  })
+    form.emails.forEach((em, i) => {
+      const err = validateContactEmail(em.emailAddress)
+      if (err) e[`email_${i}`] = err
+    })
 
-  form.phones.forEach((ph, i) => {
-    const err = validateContactPhone(ph.phoneNumber)
-    if (err) e[`phone_${i}`] = err
-  })
+    form.phones.forEach((ph, i) => {
+      const err = validateContactPhone(ph.phoneNumber)
+      if (err) e[`phone_${i}`] = err
+    })
 
-  if (Object.keys(e).length > 0) {
-    setError(Object.values(e)[0])
-    return
+    if (Object.keys(e).length > 0) {
+      setError(Object.values(e)[0])
+      return
+    }
+
+    setLoading(true)
+    setError('')
+    try {
+      await api.put(`/contacts/${contact.id}`, form)
+      onUpdated()
+      onClose()
+    } catch (err) {
+      setError(err.response?.data?.message || 'Update failed')
+    } finally {
+      setLoading(false)
+    }
   }
-
-  setLoading(true)
-  setError('')
-  try {
-    await api.put(`/contacts/${contact.id}`, form)
-    onUpdated()
-    onClose()
-  } catch (err) {
-    setError(err.response?.data?.message || 'Update failed')
-  } finally {
-    setLoading(false)
-  }
-}
 
   const inputStyle = { marginBottom: 12 }
   const labelColors = {
@@ -163,28 +165,46 @@ export default function EditContactModal({ open, onClose, contact, onUpdated }) 
             {/* NAME ROW */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 12 }}>
               <div>
-                <label className="form-label">First Name</label>
-                <input className="form-input" name="firstName"
-                  value={form.firstName} onChange={handleChange} placeholder="Jane" />
+                <label className="form-label" htmlFor="edit-firstName">First Name</label>
+                <input
+                  id="edit-firstName"
+                  className="form-input"
+                  name="firstName"
+                  value={form.firstName}
+                  onChange={handleChange}
+                  placeholder="Jane"
+                />
               </div>
               <div>
-                <label className="form-label">Last Name</label>
-                <input className="form-input" name="lastName"
-                  value={form.lastName} onChange={handleChange} placeholder="Smith" />
+                <label className="form-label" htmlFor="edit-lastName">Last Name</label>
+                <input
+                  id="edit-lastName"
+                  className="form-input"
+                  name="lastName"
+                  value={form.lastName}
+                  onChange={handleChange}
+                  placeholder="Smith"
+                />
               </div>
             </div>
 
             {/* TITLE */}
             <div style={inputStyle}>
-              <label className="form-label">Title / Role</label>
-              <input className="form-input" name="title"
-                value={form.title} onChange={handleChange} placeholder="Senior Manager" />
+              <label className="form-label" htmlFor="edit-title">Title / Role</label>
+              <input
+                id="edit-title"
+                className="form-input"
+                name="title"
+                value={form.title}
+                onChange={handleChange}
+                placeholder="Senior Manager"
+              />
             </div>
 
             {/* EMAILS */}
             <div style={{ marginBottom: 16 }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-                <label className="form-label" style={{ margin: 0 }}>Email Addresses</label>
+                <label className="form-label" htmlFor="edit-email-0" style={{ margin: 0 }}>Email Addresses</label>
                 <button onClick={addEmail} style={{
                   fontSize: 12, color: 'var(--cyan)', background: 'none',
                   border: 'none', cursor: 'pointer', fontWeight: 600,
@@ -192,10 +212,14 @@ export default function EditContactModal({ open, onClose, contact, onUpdated }) 
               </div>
               {form.emails.map((em, i) => (
                 <div key={i} style={{ display: 'grid', gridTemplateColumns: '1fr auto auto', gap: 8, marginBottom: 8 }}>
-                  <input className="form-input" type="email"
+                  <input
+                    id={`edit-email-${i}`}
+                    className="form-input"
+                    type="email"
                     placeholder="email@example.com"
                     value={em.emailAddress}
-                    onChange={e => updateEmail(i, 'emailAddress', e.target.value)} />
+                    onChange={e => updateEmail(i, 'emailAddress', e.target.value)}
+                  />
                   <select className="form-input" style={{ appearance: 'none', width: 100,
                     background: labelColors[em.label]?.bg || 'rgba(255,255,255,0.05)',
                     color: labelColors[em.label]?.color || 'var(--white)' }}
@@ -219,7 +243,7 @@ export default function EditContactModal({ open, onClose, contact, onUpdated }) 
             {/* PHONES */}
             <div style={{ marginBottom: 28 }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-                <label className="form-label" style={{ margin: 0 }}>Phone Numbers</label>
+                <label className="form-label" htmlFor="edit-phone-0" style={{ margin: 0 }}>Phone Numbers</label>
                 <button onClick={addPhone} style={{
                   fontSize: 12, color: 'var(--cyan)', background: 'none',
                   border: 'none', cursor: 'pointer', fontWeight: 600,
@@ -227,10 +251,13 @@ export default function EditContactModal({ open, onClose, contact, onUpdated }) 
               </div>
               {form.phones.map((ph, i) => (
                 <div key={i} style={{ display: 'grid', gridTemplateColumns: '1fr auto auto', gap: 8, marginBottom: 8 }}>
-                  <input className="form-input"
+                  <input
+                    id={`edit-phone-${i}`}
+                    className="form-input"
                     placeholder="+1 234 567 890"
                     value={ph.phoneNumber}
-                    onChange={e => updatePhone(i, 'phoneNumber', e.target.value)} />
+                    onChange={e => updatePhone(i, 'phoneNumber', e.target.value)}
+                  />
                   <select className="form-input" style={{ appearance: 'none', width: 100,
                     background: labelColors[ph.label]?.bg || 'rgba(255,255,255,0.05)',
                     color: labelColors[ph.label]?.color || 'var(--white)' }}
@@ -279,4 +306,26 @@ export default function EditContactModal({ open, onClose, contact, onUpdated }) 
   )
 }
 
+EditContactModal.propTypes = {
+  open:      PropTypes.bool.isRequired,
+  onClose:   PropTypes.func.isRequired,
+  onUpdated: PropTypes.func.isRequired,
+  contact:   PropTypes.shape({
+    id:        PropTypes.number,
+    firstName: PropTypes.string,
+    lastName:  PropTypes.string,
+    title:     PropTypes.string,
+    emails:    PropTypes.arrayOf(PropTypes.shape({
+      emailAddress: PropTypes.string,
+      label:        PropTypes.string,
+    })),
+    phones:    PropTypes.arrayOf(PropTypes.shape({
+      phoneNumber: PropTypes.string,
+      label:       PropTypes.string,
+    })),
+  }),
+}
 
+EditContactModal.defaultProps = {
+  contact: null,
+}

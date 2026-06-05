@@ -9,6 +9,20 @@ import {
   validatePhone,
   validatePassword,
 } from '../utils/validators'
+import PropTypes from 'prop-types'
+
+// Helper component for field errors
+const ErrMsg = ({ field, errors }) =>
+  errors[field] ? (
+    <div style={{ color: 'var(--pink)', fontSize: 11, marginTop: 4 }}>
+      ⚠ {errors[field]}
+    </div>
+  ) : null
+
+ErrMsg.propTypes = {
+  field: PropTypes.string.isRequired,
+  errors: PropTypes.object.isRequired,
+}
 
 export default function RegisterPage() {
   const [form, setForm] = useState({
@@ -28,102 +42,90 @@ export default function RegisterPage() {
     setApiError('')
   }
 
-const validate = () => {
-  const e = {}
+  const validate = () => {
+    const e = {}
 
-  const usernameErr = validateUsername(form.username)
-  if (usernameErr) e.username = usernameErr
+    const usernameErr = validateUsername(form.username)
+    if (usernameErr) e.username = usernameErr
 
-  if (!form.email.trim() && !form.phoneNumber.trim()) {
-    e.contact = 'Please provide an email or phone number'
+    if (!form.email.trim() && !form.phoneNumber.trim()) {
+      e.contact = 'Please provide an email or phone number'
+    }
+
+    if (form.email.trim()) {
+      const emailErr = validateEmail(form.email)
+      if (emailErr) e.email = emailErr
+    }
+
+    if (form.phoneNumber.trim()) {
+      const phoneErr = validatePhone(form.phoneNumber)
+      if (phoneErr) e.phoneNumber = phoneErr
+    }
+
+    const passErr = validatePassword(form.password)
+    if (passErr) e.password = passErr
+
+    return e
   }
-
-  if (form.email.trim()) {
-    const emailErr = validateEmail(form.email)
-      console.log('Email error:', emailErr)  // <-- add this
-    if (emailErr) e.email = emailErr
-  }
-
-  if (form.phoneNumber.trim()) {
-    const phoneErr = validatePhone(form.phoneNumber)
-    if (phoneErr) e.phoneNumber = phoneErr
-  }
-
-  
-
-  const passErr = validatePassword(form.password)
-  if (passErr) e.password = passErr
-
-  return e
-}
 
   const handleSubmit = async (e) => {
-  e.preventDefault()
-  setApiError('')
-  const e2 = validate()
-  if (Object.keys(e2).length > 0) { setErrors(e2); return }
+    e.preventDefault()
+    setApiError('')
+    const e2 = validate()
+    if (Object.keys(e2).length > 0) { setErrors(e2); return }
 
-  setLoading(true)
-  try {
-    // triple-check: null if empty, never send ""
-    const emailVal       = form.email.trim()       || null
-    const phoneVal       = form.phoneNumber.trim() || null
+    setLoading(true)
+    try {
+      // triple-check: null if empty, never send ""
+      const emailVal = form.email.trim() || null
+      const phoneVal = form.phoneNumber.trim() || null
 
-    // frontend guard — should never reach backend with both null
-    if (!emailVal && !phoneVal) {
-      setErrors(p => ({ ...p,
-        contact: 'Please provide an email or phone number' }))
+      // frontend guard — should never reach backend with both null
+      if (!emailVal && !phoneVal) {
+        setErrors(p => ({ ...p,
+          contact: 'Please provide an email or phone number' }))
+        setLoading(false)
+        return
+      }
+
+      const payload = {
+        username: form.username.trim(),
+        password: form.password,
+        email: emailVal,
+        phoneNumber: phoneVal,
+      }
+
+      const res = await api.post('/auth/register', payload)
+      const { token, username, email } = res.data.data
+      login({ username, email }, token)
+      navigate('/dashboard')
+    } catch (err) {
+      const msg = err.response?.data?.message || ''
+      const msgLower = msg.toLowerCase()
+
+      if (msgLower.includes('username')) {
+        setErrors(p => ({ ...p, username: msg }))
+      } else if (msgLower.includes('valid email')) {
+        setErrors(p => ({ ...p, email: msg }))
+      } else if (msgLower.includes('email')) {
+        setErrors(p => ({ ...p, email: msg }))
+      } else if (msgLower.includes('phone')) {
+        setErrors(p => ({ ...p, phoneNumber: msg }))
+      } else if (msgLower.includes('email or phone')) {
+        setErrors(p => ({ ...p, contact: msg }))
+      } else {
+        setApiError(msg || 'Registration failed. Please try again.')
+      }
+    } finally {
       setLoading(false)
-      return
     }
-
-    const payload = {
-      username:    form.username.trim(),
-      password:    form.password,
-      email:       emailVal,
-      phoneNumber: phoneVal,
-    }
-
-    // log the payload so you can inspect in browser console
-    console.log('Register payload:', JSON.stringify(payload))
-
-    const res = await api.post('/auth/register', payload)
-    const { token, username, email } = res.data.data
-    login({ username, email }, token)
-    navigate('/dashboard')
-  } catch (err) {
-    const msg = err.response?.data?.message || ''
-    const msgLower = msg.toLowerCase()
-
-    console.log('Register error:', msg)
-
-    if (msgLower.includes('username')) {
-      setErrors(p => ({ ...p, username: msg }))
-    } else if (msgLower.includes('valid email')) {
-      setErrors(p => ({ ...p, email: msg }))
-    } else if (msgLower.includes('email')) {
-      setErrors(p => ({ ...p, email: msg }))
-    } else if (msgLower.includes('phone')) {
-      setErrors(p => ({ ...p, phoneNumber: msg }))
-    } else if (msgLower.includes('email or phone')) {
-      setErrors(p => ({ ...p, contact: msg }))
-    } else {
-      setApiError(msg || 'Registration failed. Please try again.')
-    }
-  } finally {
-    setLoading(false)
   }
-}
 
   const inputErr = (key) => errors[key] ? {
     borderColor: 'rgba(255,0,153,0.6)',
-    background:  'rgba(255,0,153,0.05)',
-    boxShadow:   '0 0 0 3px rgba(255,0,153,0.1)',
+    background: 'rgba(255,0,153,0.05)',
+    boxShadow: '0 0 0 3px rgba(255,0,153,0.1)',
   } : {}
-
-  const ErrMsg = ({ field }) => errors[field]
-    ? <div style={{ color:'var(--pink)', fontSize:11, marginTop:4 }}>⚠ {errors[field]}</div>
-    : null
 
   return (
     <div style={{
@@ -180,26 +182,38 @@ const validate = () => {
 
           {/* USERNAME */}
           <div style={{ marginBottom: 16 }}>
-            <label className="form-label">Username *</label>
-            <input className="form-input" name="username"
-              placeholder="johndoe" value={form.username}
-              onChange={handleChange} style={inputErr('username')} />
-            <ErrMsg field="username" />
+            <label className="form-label" htmlFor="reg-username">Username *</label>
+            <input
+              id="reg-username"
+              className="form-input"
+              name="username"
+              placeholder="johndoe"
+              value={form.username}
+              onChange={handleChange}
+              style={inputErr('username')}
+            />
+            <ErrMsg field="username" errors={errors} />
           </div>
 
           {/* EMAIL */}
           <div style={{ marginBottom: 16 }}>
-            <label className="form-label">
+            <label className="form-label" htmlFor="reg-email">
               Email
               <span style={{ color:'var(--muted)', fontWeight:400,
                 marginLeft:6, textTransform:'none', letterSpacing:0 }}>
-                (required if no phone)
+                {' '}(required if no phone)
               </span>
             </label>
-           <input className="form-input" name="email"
-  placeholder="john@example.com" value={form.email}
-  onChange={handleChange} style={inputErr('email')} />
-            <ErrMsg field="email" />
+            <input
+              id="reg-email"
+              className="form-input"
+              name="email"
+              placeholder="john@example.com"
+              value={form.email}
+              onChange={handleChange}
+              style={inputErr('email')}
+            />
+            <ErrMsg field="email" errors={errors} />
           </div>
 
           {/* DIVIDER */}
@@ -214,17 +228,23 @@ const validate = () => {
 
           {/* PHONE */}
           <div style={{ marginBottom: 16 }}>
-            <label className="form-label">
+            <label className="form-label" htmlFor="reg-phone">
               Phone Number
               <span style={{ color:'var(--muted)', fontWeight:400,
                 marginLeft:6, textTransform:'none', letterSpacing:0 }}>
-                (required if no email)
+                {' '}(required if no email)
               </span>
             </label>
-            <input className="form-input" name="phoneNumber"
-              placeholder="+1 234 567 890" value={form.phoneNumber}
-              onChange={handleChange} style={inputErr('phoneNumber')} />
-            <ErrMsg field="phoneNumber" />
+            <input
+              id="reg-phone"
+              className="form-input"
+              name="phoneNumber"
+              placeholder="+1 234 567 890"
+              value={form.phoneNumber}
+              onChange={handleChange}
+              style={inputErr('phoneNumber')}
+            />
+            <ErrMsg field="phoneNumber" errors={errors} />
           </div>
 
           {/* CONTACT ERROR — shown when neither email nor phone provided */}
@@ -239,11 +259,18 @@ const validate = () => {
 
           {/* PASSWORD */}
           <div style={{ marginBottom: 28 }}>
-            <label className="form-label">Password *</label>
-            <input className="form-input" name="password" type="password"
-              placeholder="Min 6 characters" value={form.password}
-              onChange={handleChange} style={inputErr('password')} />
-            <ErrMsg field="password" />
+            <label className="form-label" htmlFor="reg-password">Password *</label>
+            <input
+              id="reg-password"
+              className="form-input"
+              name="password"
+              type="password"
+              placeholder="Min 6 characters"
+              value={form.password}
+              onChange={handleChange}
+              style={inputErr('password')}
+            />
+            <ErrMsg field="password" errors={errors} />
           </div>
 
           <motion.button type="submit" disabled={loading}

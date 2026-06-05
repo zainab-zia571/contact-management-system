@@ -14,15 +14,15 @@ export default function LoginPage() {
   const navigate = useNavigate()
 
   const validate = () => {
-  const e = {}
-  if (!identifier.trim())
-    e.identifier = 'Email, username or phone is required'
-  if (!password.trim())
-    e.password = 'Password is required'
-  else if (password.length < 6)
-    e.password = 'Password must be at least 6 characters'
-  return e
-}
+    const e = {}
+    if (!identifier.trim())
+      e.identifier = 'Email, username or phone is required'
+    if (!password.trim())
+      e.password = 'Password is required'
+    else if (password.length < 6)
+      e.password = 'Password must be at least 6 characters'
+    return e
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -106,8 +106,13 @@ export default function LoginPage() {
         <form onSubmit={handleSubmit}>
           {/* IDENTIFIER */}
           <div style={{ marginBottom: 6 }}>
-            <label className="form-label">Email, Username or Phone</label>
-            <input className="form-input" type="text"
+            <label className="form-label" htmlFor="login-identifier">
+              Email, Username or Phone
+            </label>
+            <input
+              id="login-identifier"
+              className="form-input"
+              type="text"
               placeholder="john@example.com"
               value={identifier}
               onChange={e => {
@@ -115,7 +120,8 @@ export default function LoginPage() {
                 setApiError('')
                 if (errors.identifier) setErrors(p => ({ ...p, identifier: '' }))
               }}
-              style={inputErr('identifier')} />
+              style={inputErr('identifier')}
+            />
             {errors.identifier && (
               <div style={{ color: 'var(--pink)', fontSize: 11, marginTop: 4 }}>
                 ⚠ {errors.identifier}
@@ -125,8 +131,13 @@ export default function LoginPage() {
 
           {/* PASSWORD */}
           <div style={{ marginBottom: 28, marginTop: 16 }}>
-            <label className="form-label">Password</label>
-            <input className="form-input" type="password"
+            <label className="form-label" htmlFor="login-password">
+              Password
+            </label>
+            <input
+              id="login-password"
+              className="form-input"
+              type="password"
               placeholder="••••••••"
               value={password}
               onChange={e => {
@@ -134,7 +145,8 @@ export default function LoginPage() {
                 setApiError('')
                 if (errors.password) setErrors(p => ({ ...p, password: '' }))
               }}
-              style={inputErr('password')} />
+              style={inputErr('password')}
+            />
             {errors.password && (
               <div style={{ color: 'var(--pink)', fontSize: 11, marginTop: 4 }}>
                 ⚠ {errors.password}

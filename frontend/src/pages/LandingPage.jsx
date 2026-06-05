@@ -1,5 +1,3 @@
-
-
 import { motion } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 
@@ -197,7 +195,7 @@ export default function LandingPage() {
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: 15,
                   color: i === 0 ? 'var(--indigo)' : 'white',
-                }}>{parseInt(s.num)}</div>
+                }}>{Number.parseInt(s.num, 10)}</div>
                 <div style={{ fontFamily: "'Syne',sans-serif", fontSize: 17, fontWeight: 700, marginBottom: 8 }}>
                   {s.title}
                 </div>

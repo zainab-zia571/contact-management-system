@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import api from '../../api/axios'
+import PropTypes from 'prop-types'
+
 
 export default function ChangePasswordModal({ open, onClose }) {
   const [form, setForm] = useState({ currentPassword: '', newPassword: '', confirm: '' })
@@ -93,4 +95,9 @@ export default function ChangePasswordModal({ open, onClose }) {
       )}
     </AnimatePresence>
   )
+}
+
+ChangePasswordModal.propTypes = {
+  open:    PropTypes.bool.isRequired,
+  onClose: PropTypes.func.isRequired,
 }

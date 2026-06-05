@@ -1,5 +1,5 @@
 
-
+import PropTypes from 'prop-types'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
@@ -48,6 +48,14 @@ function AppRoutes() {
       />
     </>
   )
+}
+
+PrivateRoute.propTypes = {
+  children: PropTypes.node.isRequired,
+}
+
+AuthProvider.propTypes = {
+  children: PropTypes.node.isRequired,
 }
 
 export default function App() {

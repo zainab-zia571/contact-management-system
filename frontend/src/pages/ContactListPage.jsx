@@ -30,7 +30,7 @@ const LABEL_STYLE = {
 }
 
 export default function ContactListPage() {
-  const { type } = useParams()    // work | personal | home | favourites | recent
+  const { type } = useParams()
   const navigate = useNavigate()
   const meta = PAGE_META[type] || PAGE_META.work
 
@@ -68,14 +68,12 @@ export default function ContactListPage() {
       let all = res.data.data.content
       setTotalPages(res.data.data.totalPages)
 
-      // filter based on type
       if (type === 'favourites') {
         all = all.filter(c => favourites.includes(c.id))
       } else if (type === 'recent') {
         all = [...all].sort((a, b) =>
           new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 10)
       } else {
-        // filter by label in emails or phones
         all = all.filter(c =>
           c.emails?.some(e => e.label === type) ||
           c.phones?.some(p => p.label === type)
@@ -105,15 +103,10 @@ export default function ContactListPage() {
 
   return (
     <div style={{ paddingTop: 100, padding: '100px 24px 60px', position: 'relative', zIndex: 2 }}>
-
-      {/* EDIT & DELETE MODALS */}
       <EditContactModal
         open={!!editContact} contact={editContact}
         onClose={() => setEditContact(null)}
-        onUpdated={(updated) => {
-          fetchContacts()
-          toast.success('Contact updated ✓')
-        }}
+        onUpdated={() => { fetchContacts(); toast.success('Contact updated ✓') }}
       />
       <DeleteContactModal
         open={!!deleteContact} contact={deleteContact}
@@ -122,8 +115,6 @@ export default function ContactListPage() {
       />
 
       <div style={{ maxWidth: 1100, margin: '0 auto' }}>
-
-        {/* PAGE HEADER */}
         <motion.div initial={{ opacity: 0, y: -16 }} animate={{ opacity: 1, y: 0 }}
           style={{ marginBottom: 32 }}>
           <button onClick={() => navigate('/dashboard')} style={{
@@ -153,7 +144,6 @@ export default function ContactListPage() {
           </div>
         </motion.div>
 
-        {/* SEARCH */}
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
           className="glass-card"
@@ -172,10 +162,9 @@ export default function ContactListPage() {
           )}
         </motion.div>
 
-        {/* CONTACT CARDS */}
         {loading ? (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(240px,1fr))', gap: 16 }}>
-            {[...Array(6)].map((_, i) => (
+            {Array.from({ length: 6 }, (_, i) => (
               <div key={i} className="glass-card" style={{ height: 200, opacity: 0.4 }} />
             ))}
           </div>
@@ -199,7 +188,6 @@ export default function ContactListPage() {
               <AnimatePresence>
                 {contacts.map((c, i) => {
                   const isFav = favourites.includes(c.id)
-                  // get the relevant emails and phones for this view
                   const relevantEmails = type === 'favourites' || type === 'recent'
                     ? c.emails : c.emails?.filter(e => e.label === type)
                   const relevantPhones = type === 'favourites' || type === 'recent'
@@ -213,8 +201,6 @@ export default function ContactListPage() {
                       whileHover={{ y: -5, boxShadow: `0 12px 40px rgba(0,0,0,0.35),0 0 0 1px ${meta.glow}` }}
                       className="glass-card"
                       style={{ padding: 22, position: 'relative' }}>
-
-                      {/* FAVOURITE STAR */}
                       <button onClick={() => toggleFavourite(c.id)} style={{
                         position: 'absolute', top: 14, right: 14,
                         background: 'none', border: 'none', cursor: 'pointer',
@@ -224,7 +210,6 @@ export default function ContactListPage() {
                         filter: isFav ? 'drop-shadow(0 0 6px #ff6600)' : 'none',
                       }}>★</button>
 
-                      {/* AVATAR */}
                       <div style={{
                         width: 50, height: 50, borderRadius: 14,
                         background: AVATAR_GRADIENTS[i % AVATAR_GRADIENTS.length],
@@ -240,7 +225,6 @@ export default function ContactListPage() {
                       </div>
                       <div style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 14 }}>{c.title || '—'}</div>
 
-                      {/* EMAILS */}
                       {(relevantEmails?.length > 0 || c.emails?.length > 0) && (
                         <div style={{ borderTop: '1px solid var(--glass-border)', paddingTop: 12, marginBottom: 8 }}>
                           {(relevantEmails?.length ? relevantEmails : c.emails)?.map((em, ei) => {
@@ -263,7 +247,6 @@ export default function ContactListPage() {
                         </div>
                       )}
 
-                      {/* PHONES */}
                       {(relevantPhones?.length > 0 || c.phones?.length > 0) && (
                         <div style={{ marginBottom: 14 }}>
                           {(relevantPhones?.length ? relevantPhones : c.phones)?.map((ph, pi) => {
@@ -283,7 +266,6 @@ export default function ContactListPage() {
                         </div>
                       )}
 
-                      {/* ACTIONS */}
                       <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
                         <button onClick={() => setEditContact(c)}
                           style={{
@@ -308,14 +290,13 @@ export default function ContactListPage() {
               </AnimatePresence>
             </div>
 
-            {/* PAGINATION */}
             {totalPages > 1 && (
               <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginTop: 28 }}>
                 <button onClick={() => setPage(p => Math.max(0, p - 1))} disabled={page === 0}
                   style={{ width: 36, height: 36, borderRadius: 8,
                     background: 'var(--glass)', border: '1px solid var(--glass-border)',
                     color: page === 0 ? 'var(--muted)' : 'var(--white)', cursor: 'pointer' }}>‹</button>
-                {[...Array(Math.min(totalPages, 7))].map((_, i) => (
+                {Array.from({ length: Math.min(totalPages, 7) }, (_, i) => (
                   <button key={i} onClick={() => setPage(i)}
                     style={{ width: 36, height: 36, borderRadius: 8,
                       background: page === i ? 'rgba(0,229,255,0.15)' : 'var(--glass)',
@@ -336,4 +317,3 @@ export default function ContactListPage() {
     </div>
   )
 }
-

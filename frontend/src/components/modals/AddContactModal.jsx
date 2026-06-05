@@ -7,6 +7,8 @@ import {
   validateContactPhone,
 } from '../../utils/validators'
 
+import PropTypes from 'prop-types'
+
 const emptyEmail = () => ({ emailAddress: '', label: 'work' })
 const emptyPhone = () => ({ phoneNumber: '', label: 'work' })
 
@@ -18,30 +20,32 @@ export default function AddContactModal({ open, onClose, onAdded }) {
   })
   const [errors, setErrors] = useState({})
   const [loading, setLoading] = useState(false)
-const validate = () => {
-  const e = {}
 
-  const firstErr = validateName(form.firstName, 'First name')
-  if (firstErr) e.firstName = firstErr
+  const validate = () => {
+    const e = {}
 
-  const lastErr = validateName(form.lastName, 'Last name')
-  if (lastErr) e.lastName = lastErr
+    const firstErr = validateName(form.firstName, 'First name')
+    if (firstErr) e.firstName = firstErr
 
-  if (form.title && form.title.trim() && /[0-9]/.test(form.title))
-    e.title = 'Title cannot contain numbers'
+    const lastErr = validateName(form.lastName, 'Last name')
+    if (lastErr) e.lastName = lastErr
 
-  form.emails.forEach((em, i) => {
-    const err = validateContactEmail(em.emailAddress)
-    if (err) e[`email_${i}`] = err
-  })
+    if (form.title && form.title.trim() && /[0-9]/.test(form.title))
+      e.title = 'Title cannot contain numbers'
 
-  form.phones.forEach((ph, i) => {
-    const err = validateContactPhone(ph.phoneNumber)
-    if (err) e[`phone_${i}`] = err
-  })
+    form.emails.forEach((em, i) => {
+      const err = validateContactEmail(em.emailAddress)
+      if (err) e[`email_${i}`] = err
+    })
 
-  return e
-}
+    form.phones.forEach((ph, i) => {
+      const err = validateContactPhone(ph.phoneNumber)
+      if (err) e[`phone_${i}`] = err
+    })
+
+    return e
+  }
+
   const handleChange = e =>
     setForm({ ...form, [e.target.name]: e.target.value })
 
@@ -148,35 +152,51 @@ const validate = () => {
             {/* NAME */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 4 }}>
               <div>
-                <label className="form-label">First Name *</label>
-                <input className="form-input" name="firstName" placeholder="Jane"
+                <label className="form-label" htmlFor="add-firstName">First Name *</label>
+                <input
+                  id="add-firstName"
+                  className="form-input"
+                  name="firstName"
+                  placeholder="Jane"
                   value={form.firstName}
                   onChange={e => { handleChange(e); if (errors.firstName) setErrors(p => ({ ...p, firstName: '' })) }}
-                  style={inputErr('firstName')} />
+                  style={inputErr('firstName')}
+                />
                 {errors.firstName && <div style={{ color: 'var(--pink)', fontSize: 11, marginTop: 4 }}>⚠ {errors.firstName}</div>}
               </div>
               <div>
-                <label className="form-label">Last Name *</label>
-                <input className="form-input" name="lastName" placeholder="Smith"
+                <label className="form-label" htmlFor="add-lastName">Last Name *</label>
+                <input
+                  id="add-lastName"
+                  className="form-input"
+                  name="lastName"
+                  placeholder="Smith"
                   value={form.lastName}
                   onChange={e => { handleChange(e); if (errors.lastName) setErrors(p => ({ ...p, lastName: '' })) }}
-                  style={inputErr('lastName')} />
+                  style={inputErr('lastName')}
+                />
                 {errors.lastName && <div style={{ color: 'var(--pink)', fontSize: 11, marginTop: 4 }}>⚠ {errors.lastName}</div>}
               </div>
             </div>
 
             {/* TITLE */}
             <div style={{ marginBottom: 16, marginTop: 12 }}>
-              <label className="form-label">Title / Role</label>
-              <input className="form-input" name="title" placeholder="Senior Manager"
-                value={form.title} onChange={handleChange} />
+              <label className="form-label" htmlFor="add-title">Title / Role</label>
+              <input
+                id="add-title"
+                className="form-input"
+                name="title"
+                placeholder="Senior Manager"
+                value={form.title}
+                onChange={handleChange}
+              />
             </div>
 
             {/* EMAILS */}
             <div style={{ marginBottom: 16 }}>
               <div style={{ display: 'flex', alignItems: 'center',
                 justifyContent: 'space-between', marginBottom: 8 }}>
-                <label className="form-label" style={{ margin: 0 }}>Email Addresses *</label>
+                <label className="form-label" htmlFor="add-email-0" style={{ margin: 0 }}>Email Addresses *</label>
                 <button onClick={addEmail} style={{
                   fontSize: 12, color: 'var(--cyan)', background: 'none',
                   border: 'none', cursor: 'pointer', fontWeight: 600,
@@ -185,11 +205,15 @@ const validate = () => {
               {form.emails.map((em, i) => (
                 <div key={i} style={{ marginBottom: 8 }}>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr auto auto', gap: 8 }}>
-                    <input className="form-input" type="email"
+                    <input
+                      id={`add-email-${i}`}
+                      className="form-input"
+                      type="email"
                       placeholder="email@example.com"
                       value={em.emailAddress}
                       onChange={e => updateEmail(i, 'emailAddress', e.target.value)}
-                      style={inputErr(`email_${i}`)} />
+                      style={inputErr(`email_${i}`)}
+                    />
                     <select className="form-input"
                       style={{
                         appearance: 'none', width: 100,
@@ -224,7 +248,7 @@ const validate = () => {
             <div style={{ marginBottom: 28 }}>
               <div style={{ display: 'flex', alignItems: 'center',
                 justifyContent: 'space-between', marginBottom: 8 }}>
-                <label className="form-label" style={{ margin: 0 }}>Phone Numbers *</label>
+                <label className="form-label" htmlFor="add-phone-0" style={{ margin: 0 }}>Phone Numbers *</label>
                 <button onClick={addPhone} style={{
                   fontSize: 12, color: 'var(--cyan)', background: 'none',
                   border: 'none', cursor: 'pointer', fontWeight: 600,
@@ -233,11 +257,14 @@ const validate = () => {
               {form.phones.map((ph, i) => (
                 <div key={i} style={{ marginBottom: 8 }}>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr auto auto', gap: 8 }}>
-                    <input className="form-input"
+                    <input
+                      id={`add-phone-${i}`}
+                      className="form-input"
                       placeholder="+1 234 567 890"
                       value={ph.phoneNumber}
                       onChange={e => updatePhone(i, 'phoneNumber', e.target.value)}
-                      style={inputErr(`phone_${i}`)} />
+                      style={inputErr(`phone_${i}`)}
+                    />
                     <select className="form-input"
                       style={{
                         appearance: 'none', width: 100,
@@ -294,4 +321,10 @@ const validate = () => {
       )}
     </AnimatePresence>
   )
+}
+
+AddContactModal.propTypes = {
+  open:     PropTypes.bool.isRequired,
+  onClose:  PropTypes.func.isRequired,
+  onAdded:  PropTypes.func.isRequired,
 }

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import api from '../../api/axios'
+import PropTypes from 'prop-types'
 
 export default function DeleteContactModal({ open, onClose, contact, onDeleted }) {
   const [loading, setLoading] = useState(false)
@@ -73,4 +74,19 @@ export default function DeleteContactModal({ open, onClose, contact, onDeleted }
       )}
     </AnimatePresence>
   )
+}
+
+DeleteContactModal.propTypes = {
+  open:      PropTypes.bool.isRequired,
+  onClose:   PropTypes.func.isRequired,
+  onDeleted: PropTypes.func.isRequired,
+  contact:   PropTypes.shape({
+    id:        PropTypes.number,
+    firstName: PropTypes.string,
+    lastName:  PropTypes.string,
+  }),
+}
+
+DeleteContactModal.defaultProps = {
+  contact: null,
 }

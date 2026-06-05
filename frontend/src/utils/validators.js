@@ -17,12 +17,19 @@ export const validateUsername = (value) => {
 
 // ── EMAIL ─────────────────────────────────────────────────
 export const validateEmail = (value) => {
-  if (!value || !value.trim()) return 'Email is required'
-  // Strict regex that rejects "notanemail"
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-  if (!emailRegex.test(value.trim())) {
-    return 'Please enter a valid email address'
-  }
+  if (!value || !value.trim())
+    return 'Email is required'
+  // \- inside [] is unnecessary — use - at end of character class
+const regex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
+  if (!regex.test(value.trim()))
+    return 'Please enter a valid email address (e.g. john@gmail.com)'
+  const domain = value.split('@')[1]
+  // optional chain instead of domain && domain.includes
+  if (!domain?.includes('.'))
+    return 'Email domain is not valid'
+  const tld = domain.split('.').pop()
+  if (!tld || tld.length < 2)
+    return 'Email domain extension is not valid'
   return ''
 }
 
@@ -30,7 +37,7 @@ export const validateEmail = (value) => {
 export const validatePhone = (value) => {
   if (!value || !value.trim())
     return 'Phone number is required'
-  const stripped = value.trim().replace(/\s/g, '')
+  const stripped = value.trim().replaceAll(' ', '')
   if (/[a-zA-Z]/.test(stripped))
     return 'Phone number cannot contain letters'
   if (!/^\+?[0-9]{7,15}$/.test(stripped))
@@ -59,7 +66,7 @@ export const validateName = (value, fieldName = 'Name') => {
     return `${fieldName} must be at least 2 characters`
   if (/[0-9]/.test(value))
     return `${fieldName} cannot contain numbers`
-  if (!/^[a-zA-Z\s'\-]+$/.test(value))
+  if (!/^[a-zA-Z\s'-]+$/.test(value))
     return `${fieldName} can only contain letters, spaces and hyphens`
   return ''
 }

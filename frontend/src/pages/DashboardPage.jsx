@@ -1,5 +1,3 @@
-
-
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAuth } from '../context/AuthContext'
@@ -171,22 +169,39 @@ export default function DashboardPage() {
             <div style={{ fontSize: 11, letterSpacing: '1.5px', textTransform: 'uppercase',
               color: 'var(--muted)', marginBottom: 10, fontWeight: 600 }}>Views</div>
 
-            {sidebarNav.map((item, i) => (
-              <div key={i}
-                onClick={item.action || undefined}
-                style={{
-                  display: 'flex', alignItems: 'center', gap: 10,
-                  padding: '10px 12px', borderRadius: 10, fontSize: 14,
-                  color: !item.action ? 'var(--cyan)' : 'var(--muted)',
-                  background: !item.action ? 'rgba(0,229,255,0.08)' : 'transparent',
-                  border: !item.action ? '1px solid rgba(0,229,255,0.15)' : '1px solid transparent',
-                  cursor: item.action ? 'pointer' : 'default',
-                  marginBottom: 4, transition: 'all 0.2s',
-                }}
-                onMouseEnter={e => { if (item.action) e.currentTarget.style.color = 'var(--white)' }}
-                onMouseLeave={e => { if (item.action) e.currentTarget.style.color = 'var(--muted)' }}>
-                <span>{item.icon}</span>{item.text}
-              </div>
+            {sidebarNav.map((item) => (
+              item.action ? (
+                <button
+                  key={item.key}
+                  onClick={item.action}
+                  onKeyDown={e => e.key === 'Enter' && item.action?.()}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: 10,
+                    padding: '10px 12px', borderRadius: 10, fontSize: 14,
+                    color: 'var(--muted)',
+                    background: 'transparent',
+                    border: '1px solid transparent',
+                    width: '100%', textAlign: 'left', cursor: 'pointer',
+                    marginBottom: 4, transition: 'all 0.2s',
+                  }}
+                  onMouseEnter={e => e.currentTarget.style.color = 'var(--white)'}
+                  onMouseLeave={e => e.currentTarget.style.color = 'var(--muted)'}
+                >
+                  <span>{item.icon}</span>{item.text}
+                </button>
+              ) : (
+                <div key={item.key}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: 10,
+                    padding: '10px 12px', borderRadius: 10, fontSize: 14,
+                    color: 'var(--cyan)',
+                    background: 'rgba(0,229,255,0.08)',
+                    border: '1px solid rgba(0,229,255,0.15)',
+                    cursor: 'default', marginBottom: 4,
+                  }}>
+                  <span>{item.icon}</span>{item.text}
+                </div>
+              )
             ))}
 
             <div style={{ height: 1, background: 'var(--glass-border)', margin: '16px 0' }} />
@@ -195,20 +210,26 @@ export default function DashboardPage() {
               color: 'var(--muted)', marginBottom: 10, fontWeight: 600 }}>Account</div>
 
             {[
-              { icon: '🔒', text: 'Change Password', action: () => setShowPassword(true) },
-              { icon: '↩', text: 'Logout', action: handleLogout },
-            ].map((item, i) => (
-              <div key={i} onClick={item.action}
+              { icon: '🔒', text: 'Change Password', key: 'change-password', action: () => setShowPassword(true) },
+              { icon: '↩', text: 'Logout', key: 'logout', action: handleLogout },
+            ].map((item) => (
+              <button
+                key={item.key}
+                onClick={item.action}
+                onKeyDown={e => e.key === 'Enter' && item.action?.()}
                 style={{
                   display: 'flex', alignItems: 'center', gap: 10,
                   padding: '10px 12px', borderRadius: 10, fontSize: 14,
-                  color: 'var(--muted)', cursor: 'pointer', marginBottom: 4,
-                  transition: 'all 0.2s',
+                  color: 'var(--muted)',
+                  background: 'none', border: 'none',
+                  width: '100%', textAlign: 'left', cursor: 'pointer',
+                  marginBottom: 4, transition: 'all 0.2s',
                 }}
                 onMouseEnter={e => e.currentTarget.style.color = 'var(--white)'}
-                onMouseLeave={e => e.currentTarget.style.color = 'var(--muted)'}>
+                onMouseLeave={e => e.currentTarget.style.color = 'var(--muted)'}
+              >
                 <span>{item.icon}</span>{item.text}
-              </div>
+              </button>
             ))}
           </motion.div>
 
@@ -234,7 +255,7 @@ export default function DashboardPage() {
 
             {loading ? (
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(220px,1fr))', gap: 16 }}>
-                {[...Array(6)].map((_, i) => (
+                {Array.from({ length: 6 }, (_, i) => (
                   <div key={i} className="glass-card" style={{ height: 200, opacity: 0.3 }} />
                 ))}
               </div>
@@ -369,7 +390,7 @@ export default function DashboardPage() {
                   style={{ width: 36, height: 36, borderRadius: 8,
                     background: 'var(--glass)', border: '1px solid var(--glass-border)',
                     color: 'var(--white)', cursor: 'pointer' }}>‹</button>
-                {[...Array(totalPages)].map((_, i) => (
+                {Array.from({ length: totalPages }, (_, i) => (
                   <button key={i} onClick={() => setPage(i)} style={{
                     width: 36, height: 36, borderRadius: 8,
                     background: page === i ? 'rgba(0,229,255,0.15)' : 'var(--glass)',
@@ -391,4 +412,3 @@ export default function DashboardPage() {
     </div>
   )
 }
-
