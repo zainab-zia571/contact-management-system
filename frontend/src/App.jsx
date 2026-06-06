@@ -1,5 +1,3 @@
-
-import PropTypes from 'prop-types'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
@@ -12,10 +10,16 @@ import LoginPage from './pages/LoginPage'
 import RegisterPage from './pages/RegisterPage'
 import DashboardPage from './pages/DashboardPage'
 import ContactListPage from './pages/ContactListPage'
+import ContactDetailPage from './pages/ContactDetailPage'
+import PropTypes from 'prop-types'
 
 function PrivateRoute({ children }) {
   const { token } = useAuth()
   return token ? children : <Navigate to="/login" replace />
+}
+
+PrivateRoute.propTypes = {
+  children: PropTypes.node.isRequired,
 }
 
 function AppRoutes() {
@@ -34,6 +38,9 @@ function AppRoutes() {
         <Route path="/contacts/:type" element={
           <PrivateRoute><ContactListPage /></PrivateRoute>
         } />
+        <Route path="/contact/:id" element={
+          <PrivateRoute><ContactDetailPage /></PrivateRoute>
+        } />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       <ToastContainer
@@ -48,14 +55,6 @@ function AppRoutes() {
       />
     </>
   )
-}
-
-PrivateRoute.propTypes = {
-  children: PropTypes.node.isRequired,
-}
-
-AuthProvider.propTypes = {
-  children: PropTypes.node.isRequired,
 }
 
 export default function App() {

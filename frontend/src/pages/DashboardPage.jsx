@@ -93,19 +93,16 @@ export default function DashboardPage() {
     <div style={{ padding: '100px 24px 60px', position: 'relative', zIndex: 2 }}>
 
       <AddContactModal open={showAdd} onClose={() => setShowAdd(false)}
-        onAdded={(created) => {
-          fetchContacts()
-          toast.success('Contact added ✓')
-        }} />
+        onAdded={() => { fetchContacts(); toast.success('Contact added ✓') }} />
+
       <EditContactModal open={!!editContact} contact={editContact}
         onClose={() => setEditContact(null)}
-        onUpdated={(updated) => {
-          fetchContacts()
-          toast.success('Contact updated ✓')
-        }} />
+        onUpdated={() => { fetchContacts(); toast.success('Contact updated ✓') }} />
+
       <DeleteContactModal open={!!deleteContact} contact={deleteContact}
         onClose={() => setDeleteContact(null)}
         onDeleted={() => { fetchContacts(); toast.success('Contact deleted') }} />
+
       <ChangePasswordModal open={showPassword} onClose={() => setShowPassword(false)} />
 
       <div style={{ maxWidth: 1200, margin: '0 auto' }}>
@@ -119,263 +116,133 @@ export default function DashboardPage() {
             fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: 18,
             background: 'linear-gradient(135deg,var(--cyan),var(--pink))',
             WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
-          }}>◎ TouchBase
-</div>
+          }}>◎ TouchBase</div>
+
           <div style={{ padding: '6px 14px', borderRadius: 100,
             background: 'rgba(0,229,255,0.08)', border: '1px solid rgba(0,229,255,0.15)',
             fontSize: 12, color: 'var(--cyan)' }}>⬤ Live</div>
+
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             <div style={{ textAlign: 'right' }}>
               <div style={{ fontSize: 14, fontWeight: 500 }}>{user?.username}</div>
               <div style={{ fontSize: 11, color: 'var(--muted)' }}>Personal Plan</div>
             </div>
-            <div style={{
-              width: 38, height: 38, borderRadius: '50%',
-              background: 'linear-gradient(135deg,var(--pink),#7700ff)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 14,
-            }}>{user?.username?.[0]?.toUpperCase()}</div>
           </div>
-        </motion.div>
-
-        {/* SEARCH */}
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="glass-card"
-          style={{ display: 'flex', alignItems: 'center', gap: 12,
-            padding: '14px 20px', marginBottom: 20 }}>
-          <span style={{ color: 'var(--muted)', fontSize: 18 }}>⌕</span>
-          <input
-            style={{ flex: 1, background: 'none', border: 'none', outline: 'none',
-              color: 'var(--white)', fontFamily: "'DM Sans',sans-serif", fontSize: 15 }}
-            placeholder="Search all contacts by name..."
-            value={search}
-            onChange={e => { setSearch(e.target.value); setPage(0) }}
-          />
-          {search && (
-            <button onClick={() => setSearch('')}
-              style={{ background: 'none', border: 'none', color: 'var(--muted)', cursor: 'pointer' }}>✕</button>
-          )}
         </motion.div>
 
         {/* GRID */}
         <div style={{ display: 'grid', gridTemplateColumns: '240px 1fr', gap: 20 }}>
 
           {/* SIDEBAR */}
-          <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.15 }}
-            className="glass-card" style={{ padding: 24, height: 'fit-content' }}>
-
-            <div style={{ fontSize: 11, letterSpacing: '1.5px', textTransform: 'uppercase',
-              color: 'var(--muted)', marginBottom: 10, fontWeight: 600 }}>Views</div>
+          <motion.div className="glass-card" style={{ padding: 24, height: 'fit-content' }}>
 
             {sidebarNav.map((item) => (
               item.action ? (
-                <button
-                  key={item.key}
-                  onClick={item.action}
-                  onKeyDown={e => e.key === 'Enter' && item.action?.()}
-                  style={{
-                    display: 'flex', alignItems: 'center', gap: 10,
-                    padding: '10px 12px', borderRadius: 10, fontSize: 14,
-                    color: 'var(--muted)',
-                    background: 'transparent',
-                    border: '1px solid transparent',
-                    width: '100%', textAlign: 'left', cursor: 'pointer',
-                    marginBottom: 4, transition: 'all 0.2s',
-                  }}
-                  onMouseEnter={e => e.currentTarget.style.color = 'var(--white)'}
-                  onMouseLeave={e => e.currentTarget.style.color = 'var(--muted)'}
-                >
-                  <span>{item.icon}</span>{item.text}
+                <button key={item.key} onClick={item.action}
+                  style={{ width: '100%', marginBottom: 4 }}>
+                  {item.icon} {item.text}
                 </button>
               ) : (
-                <div key={item.key}
-                  style={{
-                    display: 'flex', alignItems: 'center', gap: 10,
-                    padding: '10px 12px', borderRadius: 10, fontSize: 14,
-                    color: 'var(--cyan)',
-                    background: 'rgba(0,229,255,0.08)',
-                    border: '1px solid rgba(0,229,255,0.15)',
-                    cursor: 'default', marginBottom: 4,
-                  }}>
-                  <span>{item.icon}</span>{item.text}
-                </div>
+                <div key={item.key}>{item.icon} {item.text}</div>
               )
             ))}
 
-            <div style={{ height: 1, background: 'var(--glass-border)', margin: '16px 0' }} />
-
-            <div style={{ fontSize: 11, letterSpacing: '1.5px', textTransform: 'uppercase',
-              color: 'var(--muted)', marginBottom: 10, fontWeight: 600 }}>Account</div>
-
-            {[
-              { icon: '🔒', text: 'Change Password', key: 'change-password', action: () => setShowPassword(true) },
-              { icon: '↩', text: 'Logout', key: 'logout', action: handleLogout },
-            ].map((item) => (
-              <button
-                key={item.key}
-                onClick={item.action}
-                onKeyDown={e => e.key === 'Enter' && item.action?.()}
-                style={{
-                  display: 'flex', alignItems: 'center', gap: 10,
-                  padding: '10px 12px', borderRadius: 10, fontSize: 14,
-                  color: 'var(--muted)',
-                  background: 'none', border: 'none',
-                  width: '100%', textAlign: 'left', cursor: 'pointer',
-                  marginBottom: 4, transition: 'all 0.2s',
-                }}
-                onMouseEnter={e => e.currentTarget.style.color = 'var(--white)'}
-                onMouseLeave={e => e.currentTarget.style.color = 'var(--muted)'}
-              >
-                <span>{item.icon}</span>{item.text}
-              </button>
-            ))}
           </motion.div>
 
           {/* CONTACTS */}
           <div>
-            <div style={{ display: 'flex', alignItems: 'center',
-              justifyContent: 'space-between', marginBottom: 16 }}>
-              <div style={{ fontSize: 14, color: 'var(--muted)' }}>
-                Showing <span style={{ color: 'var(--white)', fontWeight: 600 }}>{contacts.length}</span> contacts
-              </div>
-              <motion.button onClick={() => setShowAdd(true)}
-                whileHover={{ scale: 1.03, boxShadow: '0 0 30px rgba(255,0,153,0.5)' }}
-                whileTap={{ scale: 0.97 }}
-                style={{
-                  display: 'flex', alignItems: 'center', gap: 8,
-                  padding: '10px 20px', borderRadius: 10,
-                  background: 'linear-gradient(135deg,var(--pink),#7700ff)',
-                  color: 'white', fontSize: 14, fontWeight: 600,
-                  border: 'none', cursor: 'pointer',
-                  boxShadow: '0 0 20px rgba(255,0,153,0.3)',
-                }}>＋ Add Contact</motion.button>
-            </div>
 
             {loading ? (
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(220px,1fr))', gap: 16 }}>
-                {Array.from({ length: 6 }, (_, i) => (
-                  <div key={i} className="glass-card" style={{ height: 200, opacity: 0.3 }} />
-                ))}
-              </div>
-            ) : contacts.length === 0 ? (
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-                className="glass-card" style={{ padding: 60, textAlign: 'center' }}>
-                <div style={{ fontSize: 48, marginBottom: 16 }}>📋</div>
-                <div style={{ fontFamily: "'Syne',sans-serif", fontSize: 20, fontWeight: 700, marginBottom: 8 }}>
-                  {search ? `No results for "${search}"` : 'No contacts yet'}
-                </div>
-                <div style={{ color: 'var(--muted)', fontSize: 14, marginBottom: 24 }}>
-                  {!search && 'Add your first contact to get started'}
-                </div>
-                {!search && (
-                  <button onClick={() => setShowAdd(true)} style={{
-                    padding: '12px 28px', borderRadius: 100,
-                    background: 'linear-gradient(135deg,var(--pink),#7700ff)',
-                    color: 'white', fontWeight: 600, border: 'none', cursor: 'pointer',
-                  }}>＋ Add Contact</button>
-                )}
-              </motion.div>
+              <div>Loading...</div>
             ) : (
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(220px,1fr))', gap: 16 }}>
                 <AnimatePresence>
                   {contacts.map((c, i) => {
                     const isFav = favourites.includes(c.id)
+
                     return (
-                      <motion.div key={c.id}
-                        initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, scale: 0.9 }}
-                        transition={{ delay: i * 0.05 }}
-                        whileHover={{ y: -4, boxShadow: '0 8px 32px rgba(0,0,0,0.3),0 0 0 1px rgba(0,229,255,0.1)' }}
-                        className="glass-card" style={{ padding: 20, position: 'relative' }}>
+                      <motion.div
+                        key={c.id}
+                        className="glass-card"
+                        style={{ padding: 20, position: 'relative', cursor: 'pointer' }}
+
+                        // ✅ CLICKABLE CARD
+                        onClick={() => navigate(`/contact/${c.id}`)}
+                        whileHover={{ y: -4 }}
+                      >
 
                         {/* STAR */}
-                        <button onClick={() => toggleFavourite(c.id)} style={{
-                          position: 'absolute', top: 12, right: 12,
-                          background: 'none', border: 'none', cursor: 'pointer',
-                          fontSize: 16, color: isFav ? '#ff6600' : 'var(--muted)',
-                          filter: isFav ? 'drop-shadow(0 0 5px #ff6600)' : 'none',
-                          transition: 'all 0.2s',
-                        }}>★</button>
+                        <button
+                          onClick={(e) => { e.stopPropagation(); toggleFavourite(c.id) }}
+                        >
+                          ★
+                        </button>
 
-                        {/* AVATAR */}
-                        <div style={{
-                          width: 46, height: 46, borderRadius: 13,
-                          background: AVATAR_GRADIENTS[i % AVATAR_GRADIENTS.length],
-                          display: 'flex', alignItems: 'center', justifyContent: 'center',
-                          fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 16,
-                          marginBottom: 10,
-                        }}>{getInitials(c.firstName, c.lastName)}</div>
+                        {/* NAME */}
+                        <div>{c.firstName} {c.lastName}</div>
 
-                        <div style={{ fontFamily: "'Syne',sans-serif", fontWeight: 600,
-                          fontSize: 14, marginBottom: 2, paddingRight: 22 }}>
-                          {c.firstName} {c.lastName}
-                        </div>
-                        <div style={{ fontSize: 11, color: 'var(--muted)', marginBottom: 12 }}>
-                          {c.title || '—'}
-                        </div>
-
-                        {/* EMAILS */}
-                        {c.emails?.length > 0 && (
-                          <div style={{ borderTop: '1px solid var(--glass-border)', paddingTop: 10, marginBottom: 6 }}>
-                            {c.emails.map((em, ei) => {
-                              const ls = getLabelStyle(em.label)
-                              return (
-                                <div key={ei} style={{ display: 'flex', alignItems: 'center',
-                                  gap: 6, marginBottom: 5, fontSize: 11 }}>
-                                  <span style={{ color: 'var(--muted)' }}>✉</span>
-                                  <span style={{ flex: 1, color: 'var(--muted)', overflow: 'hidden',
-                                    textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                                    {em.emailAddress}
-                                  </span>
-                                  <span style={{
-                                    padding: '1px 7px', borderRadius: 100, fontSize: 9, fontWeight: 700,
-                                    background: ls.bg, color: ls.color, border: `1px solid ${ls.border}`,
-                                    textTransform: 'uppercase', letterSpacing: '0.5px',
-                                  }}>{em.label}</span>
-                                </div>
-                              )
-                            })}
-                          </div>
-                        )}
-
-                        {/* PHONES */}
-                        {c.phones?.length > 0 && (
-                          <div style={{ marginBottom: 12 }}>
-                            {c.phones.map((ph, pi) => {
-                              const ls = getLabelStyle(ph.label)
-                              return (
-                                <div key={pi} style={{ display: 'flex', alignItems: 'center',
-                                  gap: 6, marginBottom: 4, fontSize: 11 }}>
-                                  <span style={{ color: 'var(--muted)' }}>📞</span>
-                                  <span style={{ flex: 1, color: 'var(--muted)' }}>{ph.phoneNumber}</span>
-                                  <span style={{
-                                    padding: '1px 7px', borderRadius: 100, fontSize: 9, fontWeight: 700,
-                                    background: ls.bg, color: ls.color, border: `1px solid ${ls.border}`,
-                                    textTransform: 'uppercase', letterSpacing: '0.5px',
-                                  }}>{ph.label}</span>
-                                </div>
-                              )
-                            })}
-                          </div>
-                        )}
-
-                        {/* ACTIONS */}
+                        {/* ACTIONS (UPDATED) */}
                         <div style={{ display: 'flex', gap: 6 }}>
-                          <button onClick={() => setEditContact(c)} style={{
-                            flex: 1, padding: '6px 0', borderRadius: 8, fontSize: 11,
-                            background: 'rgba(0,229,255,0.08)',
-                            border: '1px solid rgba(0,229,255,0.15)',
-                            color: 'var(--cyan)', cursor: 'pointer', fontWeight: 500,
-                          }}>✏ Edit</button>
-                          <button onClick={() => setDeleteContact(c)} style={{
-                            flex: 1, padding: '6px 0', borderRadius: 8, fontSize: 11,
-                            background: 'rgba(255,0,153,0.08)',
-                            border: '1px solid rgba(255,0,153,0.15)',
-                            color: 'var(--pink)', cursor: 'pointer', fontWeight: 500,
-                          }}>✕ Delete</button>
+
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              navigate(`/contact/${c.id}`)
+                            }}
+                            style={{
+                              flex: 2,
+                              padding: '6px 0',
+                              borderRadius: 8,
+                              fontSize: 11,
+                              background: 'rgba(255,255,255,0.05)',
+                              border: '1px solid rgba(255,255,255,0.1)',
+                              color: 'var(--white)',
+                              cursor: 'pointer',
+                              fontWeight: 500,
+                            }}>
+                            👁 View
+                          </button>
+
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              setEditContact(c)
+                            }}
+                            style={{
+                              flex: 1,
+                              padding: '6px 0',
+                              borderRadius: 8,
+                              fontSize: 11,
+                              background: 'rgba(0,229,255,0.08)',
+                              border: '1px solid rgba(0,229,255,0.15)',
+                              color: 'var(--cyan)',
+                              cursor: 'pointer',
+                              fontWeight: 500,
+                            }}>
+                            ✏
+                          </button>
+
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              setDeleteContact(c)
+                            }}
+                            style={{
+                              flex: 1,
+                              padding: '6px 0',
+                              borderRadius: 8,
+                              fontSize: 11,
+                              background: 'rgba(255,0,153,0.08)',
+                              border: '1px solid rgba(255,0,153,0.15)',
+                              color: 'var(--pink)',
+                              cursor: 'pointer',
+                              fontWeight: 500,
+                            }}>
+                            🗑
+                          </button>
+
                         </div>
+
                       </motion.div>
                     )
                   })}
@@ -383,29 +250,6 @@ export default function DashboardPage() {
               </div>
             )}
 
-            {/* PAGINATION */}
-            {totalPages > 1 && (
-              <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginTop: 24 }}>
-                <button onClick={() => setPage(p => Math.max(0, p - 1))} disabled={page === 0}
-                  style={{ width: 36, height: 36, borderRadius: 8,
-                    background: 'var(--glass)', border: '1px solid var(--glass-border)',
-                    color: 'var(--white)', cursor: 'pointer' }}>‹</button>
-                {Array.from({ length: totalPages }, (_, i) => (
-                  <button key={i} onClick={() => setPage(i)} style={{
-                    width: 36, height: 36, borderRadius: 8,
-                    background: page === i ? 'rgba(0,229,255,0.15)' : 'var(--glass)',
-                    border: page === i ? '1px solid rgba(0,229,255,0.3)' : '1px solid var(--glass-border)',
-                    color: page === i ? 'var(--cyan)' : 'var(--muted)',
-                    fontWeight: page === i ? 600 : 400, cursor: 'pointer',
-                  }}>{i + 1}</button>
-                ))}
-                <button onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))}
-                  disabled={page === totalPages - 1}
-                  style={{ width: 36, height: 36, borderRadius: 8,
-                    background: 'var(--glass)', border: '1px solid var(--glass-border)',
-                    color: 'var(--white)', cursor: 'pointer' }}>›</button>
-              </div>
-            )}
           </div>
         </div>
       </div>
