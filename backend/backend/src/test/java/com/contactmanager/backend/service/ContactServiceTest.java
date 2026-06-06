@@ -14,7 +14,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.*;
-
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -57,8 +57,8 @@ class ContactServiceTest {
                 .firstName("Jane")
                 .lastName("Smith")
                 .title("Manager")
-                .emails(List.of(email))
-                .phones(List.of(phone))
+                .emails(new ArrayList<>(List.of(email)))   // ← mutable list
+                .phones(new ArrayList<>(List.of(phone)))   // ← mutable list
                 .build();
 
         ContactRequest.EmailEntry emailEntry = new ContactRequest.EmailEntry();

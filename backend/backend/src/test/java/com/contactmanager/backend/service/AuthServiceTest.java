@@ -101,7 +101,8 @@ class AuthServiceTest {
 
         assertThatThrownBy(() -> authService.register(request))
                 .isInstanceOf(BadRequestException.class)
-                .hasMessageContaining("Email or phone number is required");
+                .hasMessageContaining(
+                        "Please provide at least one of email or phone number");
 
         verify(userRepository, never()).save(any());
     }

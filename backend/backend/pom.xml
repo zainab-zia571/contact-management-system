@@ -18,7 +18,7 @@
 
 		<!-- SonarQube connection -->
 		<sonar.host.url>http://localhost:9000</sonar.host.url>
-		<sonar.login>sqp_04ef37c8b8647c14e3dd0f497aad404f51882e94</sonar.login>
+				<sonar.login>sqp_04ef37c8b8647c14e3dd0f497aad404f51882e94</sonar.login>
 		<sonar.projectKey>ContactManagement</sonar.projectKey>
 
 		<sonar.exclusions>

@@ -38,6 +38,7 @@ class AuthControllerTest {
     @MockitoBean private JwtTokenProvider jwtTokenProvider;
     @MockitoBean private CustomUserDetailsService customUserDetailsService;
 
+
     // ── REGISTER ────────────────────────────────────────────
 
     @Test

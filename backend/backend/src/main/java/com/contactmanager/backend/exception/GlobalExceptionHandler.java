@@ -44,12 +44,10 @@ public class GlobalExceptionHandler {
                 .body(ApiResponse.error(errors));
     }
 
-    // ── catches DB constraint violations ────────────────────
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ApiResponse<Void>> handleDataIntegrity(
             DataIntegrityViolationException ex) {
 
-        // log the full message so you can see exactly what fired
         String rootMsg = ex.getRootCause() != null
                 ? ex.getRootCause().getMessage() : "";
         String msg = ex.getMessage() != null
@@ -69,7 +67,8 @@ public class GlobalExceptionHandler {
         if (combined.contains("ix_") && combined.contains("email")
                 || combined.contains("unique") && combined.contains("email")) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(ApiResponse.error("This email is already registered"));
+                    .body(ApiResponse.error(
+                            "This email is already registered"));
         }
         if (combined.contains("phone")) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
@@ -78,11 +77,21 @@ public class GlobalExceptionHandler {
         }
         if (combined.contains("username")) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(ApiResponse.error("This username is already taken"));
+                    .body(ApiResponse.error(
+                            "This username is already taken"));
         }
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(ApiResponse.error(
                         "A registration error occurred. Please check your details."));
+    }
+
+    // ── catches any other unexpected exception ───────────────
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ApiResponse<Void>> handleGeneral(Exception ex) {
+        log.error("Unexpected error: {}", ex.getMessage(), ex);
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(ApiResponse.error("An unexpected error occurred"));
     }
 }
