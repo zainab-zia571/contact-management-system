@@ -67,8 +67,8 @@ contact-management-system/
 ```bash
 cd backend
 # update src/main/resources/application.properties with your DB credentials
-mvn clean install
-mvn spring-boot:run
+.\mvnw clean install
+.\mvnw spring-boot:run
 ```
 Backend runs on `http://localhost:8080`
 
@@ -85,20 +85,16 @@ Frontend runs on `http://localhost:5173`
 Backend:
 ```bash
 cd backend
-mvn clean test
+.\mvnw clean test
 ```
 
-Frontend:
-```bash
-cd frontend
-npm run test:coverage
-```
+
 
 ### SonarQube Analysis
 ```bash
 # Backend
 cd backend
-mvn sonar:sonar -Dsonar.login=YOUR_TOKEN
+.\mvnw sonar:sonar -Dsonar.login=YOUR_TOKEN
 
 # Frontend
 cd frontend
@@ -120,8 +116,7 @@ npm run sonar
 | POST | `/api/contacts` | Create contact |
 | PUT | `/api/contacts/{id}` | Update contact |
 | DELETE | `/api/contacts/{id}` | Delete contact |
-| GET | `/api/contacts/export` | Export contacts as CSV |
-| POST | `/api/contacts/import` | Import contacts from CSV |
+
 
 ---
 
@@ -131,6 +126,5 @@ npm run sonar
 |-------|-------|----------|
 | Backend Services | 27 tests | 97%+ |
 | Backend Controllers | 20 tests | 93%+ |
-| Backend Repositories | 17 tests | — |
 | Backend Security | 18 tests | 80%+ |
 
